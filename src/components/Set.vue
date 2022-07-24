@@ -2,9 +2,9 @@
   <div class="hello">
     <h1>设置参与人</h1>
     <el-row>
-      <el-button type="primary" @click="OnClick">记录</el-button>
+      <el-button type="primary" @click="OnClick">保存</el-button>
     </el-row>
-    <p>设置今日参与的同学({{checkList.length}})</p>
+    <p>勾选设置今日参与的同学({{checkList.length}})</p>
     <el-checkbox-group v-model="checkList">
       <el-checkbox v-for="item in name_list" :key="item.id" :label="item" border>
         {{ item.name }}
