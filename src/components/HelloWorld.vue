@@ -16,7 +16,7 @@
     </el-checkbox-group>
     <el-row>
       <el-button type="primary" @click="OnClick">随机分组</el-button>
-      <el-button type="danger" @click="OnAll">全选</el-button>
+      <el-button type="danger" @click="OnSave">保存结果</el-button>
     </el-row>
     <el-row>
       <div v-for="(obj, index) in match_list" :key="obj[0]">
@@ -71,9 +71,17 @@
     </el-row>
     <el-row v-if="rest_list.length > 0">
       <p>
-        休息中:
+        本场休息:
       </p>
       <el-tag v-for="item in rest_list" :key="item" type="danger">
+        {{ item }}
+      </el-tag>
+    </el-row>
+    <el-row v-if="black_list.length > 0">
+      <p>
+        今日已休息列表:
+      </p>
+      <el-tag v-for="item in black_list" :key="item" type="info">
         {{ item }}
       </el-tag>
     </el-row>
@@ -82,7 +90,8 @@
 
 <script>
 
-import {cloneDeep, shuffle, slice} from 'lodash';
+import {cloneDeep, shuffle, slice, includes, uniq} from 'lodash';
+import axios from 'axios'
 
 export default {
   name: 'HelloWorld',
@@ -94,6 +103,12 @@ export default {
         this.checkList = []
       }
     },
+    OnSave: function () {
+      this.black_list.push(...this.rest_list)
+      this.black_list = uniq(this.black_list)
+      console.log(this.black_list)
+      axios.post('/black', this.black_list)
+    },
     OnClick: function () {
       this.rest_list = []
       let player_arr = cloneDeep(this.checkList)
@@ -104,6 +119,11 @@ export default {
       if (cnt > max_player) {
         this.rest_list = slice(player_arr, max_player)
         player_arr = slice(player_arr, 0, max_player)
+      }
+      for (const name of this.rest_list) {
+        if (includes(this.black_list, name)) {
+          alert(`${name}今日已轮空过了，建议重新随机`)
+        }
       }
       this.match_list = []
       for (let i = 0; i < this.plate; ++i) {
@@ -121,18 +141,42 @@ export default {
         }
       }
     },
+    getSvrList : function () {
+      const _this = this
+      axios.get('/list')
+          .then(function(response)
+          {
+              console.log(response);
+              const list = response.data.map( row => row.name)
+              _this.checkList = list
+              _this.name_list = list
+              _this.plate = Math.floor(_this.name_list.length / 4)
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+      axios.get('/black')
+          .then(function(response)
+          {
+            _this.black_list = response.data;
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+    }
   },
   data() {
     return {
       plate: 3,
-      name_list: ["grissomshen", "zhenghou", "kenlou", "edwinzhu", "yintaoxu", "jejunzeng",
-        "zeroozhang", "jennywu", "hongyizhang", "robertwan", "waveryu", "mztchen","junbinlu"],
+      name_list: [],
       rest_list: [],
       checkList: [],
+      black_list : [],
       match_list: [],
     };
   },
   mounted() {
+    this.getSvrList()
     this.checkList = this.name_list
   }
 }
