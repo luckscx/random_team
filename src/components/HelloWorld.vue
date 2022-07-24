@@ -8,7 +8,7 @@
       <el-radio :label="3">3</el-radio>
       <el-radio :label="4">4</el-radio>
     </el-radio-group>
-    <p>勾选参与分组同学</p>
+    <p>勾选参与分组同学({{checkList.length}}) </p>
     <el-checkbox-group v-model="checkList">
       <el-checkbox v-for="item in name_list" :key="item" :label="item">
         {{ item }}
@@ -124,11 +124,9 @@ export default {
   },
   data() {
     return {
-      plate: 2,
-      name_list: ["grissomshen", "zhenghou", "kenlou", "davidcai", "edwinzhu",
-        "zeroozhang", "jennywu", "hongyizhang", "jetxie", "jejunzeng",
-        "v_ayuyzhou", "derekzwang",
-        "robertwan", "waveryu", "mztchen"],
+      plate: 3,
+      name_list: ["grissomshen", "zhenghou", "kenlou", "edwinzhu", "yintaoxu", "jejunzeng",
+        "zeroozhang", "jennywu", "hongyizhang", "robertwan", "waveryu", "mztchen","junbinlu"],
       rest_list: [],
       checkList: [],
       match_list: [],
