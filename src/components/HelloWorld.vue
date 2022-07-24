@@ -95,20 +95,16 @@ export default {
       }
     },
     OnClick: function () {
-      console.log(this.checkList);
       this.rest_list = []
       let player_arr = cloneDeep(this.checkList)
       const cnt = player_arr.length
-      console.log(cnt);
       const max_player = 4 * this.plate
       // 一次随机即可
       player_arr = shuffle(player_arr)
-      console.log(max_player);
       if (cnt > max_player) {
         this.rest_list = slice(player_arr, max_player)
         player_arr = slice(player_arr, 0, max_player)
       }
-      console.log(this.rest_list);
       this.match_list = []
       for (let i = 0; i < this.plate; ++i) {
         const match_obj = {}
