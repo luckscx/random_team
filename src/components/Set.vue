@@ -26,14 +26,33 @@ export default {
       axios.post("/list", player_arr)
       alert("已设置今日参加同学")
     },
+    getCurrentList : function () {
+      let _this = this
+      axios.get('/list')
+          .then(function(response)
+          {
+            _this.checkList = []
+            for (const item of response.data) {
+              // 必须要和name list中的对象一致才行
+              for (const obj of _this.name_list) {
+                if (obj.id === item.id) {
+                  _this.checkList.push(obj)
+                }
+              }
+            }
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+    },
     getSvrList : function () {
       let _this = this
       axios.get('/all')
           .then(function(response)
           {
               console.log(response.data);
-              _this.checkList = response.data.slice(0,12);
               _this.name_list = response.data;
+              _this.getCurrentList()
           })
           .catch(function (error) { // 请求失败处理
             console.log(error);
@@ -49,7 +68,7 @@ export default {
   },
   mounted() {
     this.getSvrList()
-    this.checkList = this.name_list
+    // this.checkList = this.name_list
   }
 }
 </script>
