@@ -1,24 +1,15 @@
 # random_team
 
-## Project setup
-```
-npm install
-```
+本项目用于 NExT羽毛球协会 随机分组作用
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+欢迎协会内成员 随便提交PR，能编过的 都会通过。
 
-### Compiles and minifies for production
-```
-npm run build
-```
+# 快速导航
 
-### Lints and fixes files
-```
-npm run lint
-```
+核心的随机实现就在
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+src/Components/HelloWorld.vue 中
+118行
+```javascript
+    player_arr = shuffle(player_arr)
+```
