@@ -31,6 +31,7 @@ const transTextVO = async (text, text_id) => {
         "VoiceType": cfg.VoiceType,
         "SessionId": text_id,
         "SampleRate" : 8000,
+        "Volume" : cfg.VoiceVolume,
         "Codec" : "mp3"
     };
     params.Text = text
