@@ -147,6 +147,7 @@ export default {
         }
         this.rest_list = new_rest_players
       }
+      player_arr = shuffle(player_arr)
 
       return player_arr
     },
