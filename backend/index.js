@@ -2,6 +2,7 @@ var express = require('express')
 var app = express()
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./db.spl3');
+const tts = require("./tts")
 
 app.use(express.json());
 
@@ -9,7 +10,7 @@ let list = []
 let black_list = []
 const player_map = {}
 
-db.all("SELECT rowid AS id, name, play_cnt FROM player", (err, rows) => {
+db.all("SELECT rowid AS id, name, play_cnt, nickname FROM player", (err, rows) => {
     for (const row of rows) {
         player_map[row.name] = row
     }
@@ -67,9 +68,17 @@ app.post('/black', function (req, res) {
     res.send(black_list)
 })
 
+app.post('/tts', function (req, res) {
+    tts.trans(req.body).then(vo => {
+        res.send(vo)
+    })
+})
+
 app.delete('/black', function (req, res) {
     black_list = []
     res.send(black_list)
 })
 
-app.listen(12000)
+const port = 12000
+console.log("listen on %d",port)
+app.listen(port)

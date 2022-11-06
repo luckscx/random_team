@@ -10,6 +10,9 @@ module.exports = defineConfig({
       '^/list': {
         target: 'http://127.0.0.1:12000',
       },
+      '^/tts': {
+        target: 'http://127.0.0.1:12000',
+      },
       '^/black': {
         target: 'http://127.0.0.1:12000',
       },

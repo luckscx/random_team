@@ -8,15 +8,16 @@
       <el-radio :label="3">3</el-radio>
       <el-radio :label="4">4</el-radio>
     </el-radio-group>
-    <p>勾选参与分组同学({{checkList.length}}) </p>
+    <p>勾选参与分组同学({{ checkList.length }}) </p>
     <el-checkbox-group v-model="checkList">
       <el-checkbox v-for="item in name_list" :key="item" :label="item">
         {{ item }}
       </el-checkbox>
     </el-checkbox-group>
     <el-row>
-      <el-button type="primary" @click="OnClick">随机分组</el-button>
-      <el-button type="danger" @click="OnSave">保存结果</el-button>
+      <el-button type="primary" @click="OnVoice" icon="el-icon-refresh">语音播报</el-button>
+      <el-button type="primary" @click="OnClick" icon="el-icon-refresh">随机分组</el-button>
+      <el-button type="danger" @click="OnSave" icon="el-icon-upload">保存结果</el-button>
     </el-row>
     <el-row>
       <div v-for="(obj, index) in match_list" :key="obj[0]">
@@ -80,6 +81,7 @@
     <el-row v-if="black_list.length > 0">
       <p>
         今日已休息列表:
+        <el-button type="danger" @click="OnEmptyBlack" icon="el-icon-delete" circle>重置</el-button>
       </p>
       <el-tag v-for="item in black_list" :key="item" type="info">
         {{ item }}
@@ -90,41 +92,65 @@
 
 <script>
 
-import {cloneDeep, shuffle, slice, includes, uniq} from 'lodash';
+import {cloneDeep, shuffle, slice, includes, uniq, remove} from 'lodash';
 import axios from 'axios'
+import {MessageBox} from 'element-ui';
 
 export default {
   name: 'HelloWorld',
   methods: {
-    OnAll: function () {
-      if (this.checkList.length < this.name_list.length) {
-        this.checkList = this.name_list
-      } else {
-        this.checkList = []
-      }
+    OnEmptyBlack: function () {
+      this.black_list = []
     },
     OnSave: function () {
       this.black_list.push(...this.rest_list)
       this.black_list = uniq(this.black_list)
-      console.log(this.black_list)
       axios.post('/black', this.black_list)
     },
-    OnClick: function () {
-      this.rest_list = []
+    GenerateRestPlayer: function () {
       let player_arr = cloneDeep(this.checkList)
+
       const cnt = player_arr.length
       const max_player = 4 * this.plate
-      // 一次随机即可
-      player_arr = shuffle(player_arr)
-      if (cnt > max_player) {
-        this.rest_list = slice(player_arr, max_player)
-        player_arr = slice(player_arr, 0, max_player)
-      }
-      for (const name of this.rest_list) {
-        if (includes(this.black_list, name)) {
-          alert(`${name}今日已轮空过了，建议重新随机`)
+      const need_rest_num = cnt - max_player
+
+      this.rest_list = []
+      let new_rest_players = []
+      if (need_rest_num > 0) {
+        let non_rest_players = []
+        for (const name of player_arr) {
+          if (includes(this.black_list, name)) {
+            continue
+          }
+          non_rest_players.push(name)
         }
+
+        if (non_rest_players.length < need_rest_num) {
+          MessageBox.confirm(`大部分玩家已轮空过了，建议重置休息列表`, '提醒', {
+            confirmButtonText: '确定重置',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.OnEmptyBlack()
+          }).catch(() => {
+            console.log("cancel")
+          })
+          return player_arr
+        }
+
+        non_rest_players = shuffle(non_rest_players)
+        new_rest_players = slice(non_rest_players, 0, need_rest_num)
+        for (const rest_player of new_rest_players) {
+          remove(player_arr, (o) => {
+            return o === rest_player
+          })
+        }
+        this.rest_list = new_rest_players
       }
+
+      return player_arr
+    },
+    SetMatchPlace(player_arr) {
       this.match_list = []
       for (let i = 0; i < this.plate; ++i) {
         const match_obj = {}
@@ -141,23 +167,53 @@ export default {
         }
       }
     },
-    getSvrList : function () {
+    OnClick: function () {
+      const player_arr = this.GenerateRestPlayer()
+      this.SetMatchPlace(player_arr)
+    },
+    OnVoice: function () {
+      if (this.match_list.length === 0) {
+        MessageBox.alert("请先随机分组")
+        return
+      }
+      const reqObj = {
+        match_list: this.match_list,
+        rest_list: this.rest_list
+      }
+      axios.post('/tts', reqObj)
+          .then(function (response) {
+            if (response.data && response.data.Audio) {
+              const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              const audio = Uint8Array.from(window.atob(response.data.Audio), c => c.charCodeAt(0))
+              audioCtx.decodeAudioData(audio.buffer, function (audioBuffer) {
+                var source = audioCtx.createBufferSource()
+                source.buffer = audioBuffer
+                source.connect(audioCtx.destination)
+                source.start(0) // 立即播放
+              });
+            } else {
+              MessageBox.alert("TTS服务失败，请联系Grissom上腾讯云续费")
+            }
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+    },
+    getSvrList: function () {
       const _this = this
       axios.get('/list')
-          .then(function(response)
-          {
-              console.log(response);
-              const list = response.data.map( row => row.name)
-              _this.checkList = list
-              _this.name_list = list
-              _this.plate = Math.floor(_this.name_list.length / 4)
+          .then(function (response) {
+            console.log(response);
+            const list = response.data.map(row => row.name)
+            _this.checkList = list
+            _this.name_list = list
+            _this.plate = Math.floor(_this.name_list.length / 4)
           })
           .catch(function (error) { // 请求失败处理
             console.log(error);
           });
       axios.get('/black')
-          .then(function(response)
-          {
+          .then(function (response) {
             _this.black_list = response.data;
           })
           .catch(function (error) { // 请求失败处理
@@ -171,7 +227,7 @@ export default {
       name_list: [],
       rest_list: [],
       checkList: [],
-      black_list : [],
+      black_list: [],
       match_list: [],
     };
   },
@@ -201,4 +257,5 @@ li {
 a {
   color: #42b983;
 }
+
 </style>

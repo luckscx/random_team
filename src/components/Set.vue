@@ -16,6 +16,7 @@
 <script>
 
 import {cloneDeep} from 'lodash';
+import {MessageBox} from 'element-ui';
 import axios from 'axios'
 
 export default {
@@ -24,7 +25,7 @@ export default {
     OnClick: function () {
       let player_arr = cloneDeep(this.checkList)
       axios.post("/list", player_arr)
-      alert("已设置今日参加同学")
+      MessageBox.alert("已设置今日参加同学")
     },
     getCurrentList : function () {
       let _this = this

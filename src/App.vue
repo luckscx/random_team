@@ -10,6 +10,7 @@
 
 <script>
 
+
 export default {
   name: 'app',
 }
@@ -23,5 +24,11 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+@media screen and (max-width: 750px) {
+  .el-message-box {
+    width: 70% !important;
+  }
 }
 </style>

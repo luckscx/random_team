@@ -7,7 +7,7 @@ valid_name = valid_name.split(";")
 valid_name = lodash.uniq(valid_name)
 
 db.serialize(() => {
-    db.run("CREATE TABLE player (name TEXT, play_cnt int)");
+    db.run("CREATE TABLE player (name TEXT, play_cnt int, nickname TEXT)");
     const stmt = db.prepare("INSERT INTO player(name,play_cnt) VALUES (?, ?)");
     valid_name.forEach((name) => {
         stmt.run(name,0);

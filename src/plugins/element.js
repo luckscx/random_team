@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { Tag, Col, Row,Button, CheckboxGroup , Checkbox,Radio, RadioGroup } from 'element-ui'
+import { Tag, Col, Row,Button, CheckboxGroup , Checkbox,Radio, RadioGroup} from 'element-ui'
 
 Vue.use(Tag)
 Vue.use(Row)
