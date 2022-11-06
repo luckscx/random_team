@@ -7,6 +7,19 @@ const SecretID = cfg.SecretID
 const SecretKey = cfg.SecretKey
 const db_base = require("./db_base.js")
 const getNickName = db_base.getNickName
+const LRU = require('lru-cache')
+
+const options = {
+    max: 200,
+    // how long to live in ms
+    ttl: 1000 * 60 * 10,
+    // return stale items before removing from cache?
+    allowStale: false,
+    updateAgeOnGet: false,
+    updateAgeOnHas: false,
+}
+
+const cache_vo = new LRU(options)
 
 // 实例化一个认证对象，入参需要传入腾讯云账户secretId，secretKey,此处还需注意密钥对的保密
 // 密钥可前往https://console.cloud.tencent.com/cam/capi网站进行获取
@@ -75,20 +88,18 @@ const TeamToText = (match_list, rest_list) => {
     return res;
 };
 
-const cache_vo = {}
-
 const trans = async (reqObj) => {
     const match_list = reqObj.match_list
     const rest_list = reqObj.rest_list
     const vo_text = TeamToText(match_list, rest_list)
     const text_id = md5(vo_text)
-    if (cache_vo[text_id])  {
+    if (cache_vo.get(text_id))  {
         console.log("hit cache %s",vo_text)
-        return cache_vo[text_id]
+        return cache_vo.get(text_id)
     }
     console.log("trans vo %s", vo_text)
     const vo = await transTextVO(vo_text, text_id)
-    cache_vo[text_id] = vo
+    cache_vo.set(text_id, vo)
     return vo;
 };
 
