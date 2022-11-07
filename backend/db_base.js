@@ -12,7 +12,7 @@ db.all("SELECT rowid AS id, name, play_cnt, nickname FROM player", (err, rows) =
 
 const getNickName = name => {
     if (player_map[name]) {
-        return player_map[name].nickname
+        return player_map[name].nickname || player_map[name].name
     }
     return name;
 };
