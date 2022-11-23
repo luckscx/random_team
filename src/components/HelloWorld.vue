@@ -1,6 +1,10 @@
 <template>
   <div class="hello">
     <h1>NExT 羽毛球随机分组</h1>
+    <div>
+      <h1>Porcupine Web + Vue ("Porcupine" Component)</h1>
+      <VoiceWidget />
+    </div>
     <span>场地数</span>
     <el-radio-group v-model="plate">
       <el-radio :label="1">1</el-radio>
@@ -92,12 +96,16 @@
 
 <script>
 
+import VoiceWidget from "@/components/VoiceWidget";
 import {cloneDeep, shuffle, slice, includes, uniq, remove} from 'lodash';
 import axios from 'axios'
 import {MessageBox} from 'element-ui';
 
 export default {
   name: 'HelloWorld',
+  components : {
+    VoiceWidget
+  },
   methods: {
     OnEmptyBlack: function () {
       this.black_list = []
