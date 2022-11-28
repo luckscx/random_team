@@ -175,6 +175,18 @@ export default {
     OnVoiceEnd: function () {
       console.log("event finished.");
     },
+    PlayBuf : function (audioCtx, audioBuffer) {
+      const _this = this
+      var source = audioCtx.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(audioCtx.destination)
+      source.start(0) // 立即播放
+      source.onended = () => {
+        _this.OnVoiceEnd()
+        _this.voice_text = "语音播报"
+        _this.b_voice_on = false
+      };
+    },
     OnVoice: function () {
       if (this.match_list.length === 0) {
         MessageBox.alert("请先随机分组")
@@ -196,15 +208,7 @@ export default {
               const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
               const audio = Uint8Array.from(window.atob(response.data.Audio), c => c.charCodeAt(0))
               audioCtx.decodeAudioData(audio.buffer, function (audioBuffer) {
-                var source = audioCtx.createBufferSource()
-                source.buffer = audioBuffer
-                source.connect(audioCtx.destination)
-                source.start(0) // 立即播放
-                source.onended = () => {
-                  _this.OnVoiceEnd()
-                  _this.voice_text = "语音播报"
-                  _this.b_voice_on = false
-                };
+                _this.PlayBuf(audioCtx,audioBuffer)
               });
             } else {
               MessageBox.alert("TTS服务失败，请联系Grissom上腾讯云续费")
