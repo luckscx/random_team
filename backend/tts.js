@@ -28,10 +28,10 @@ const clientConfig = {
         secretId: SecretID,
         secretKey: SecretKey,
     },
-    region: "ap-hongkong",
+    region: "ap-shanghai",
     profile: {
         httpProfile: {
-            endpoint: "tts.ap-hongkong.tencentcloudapi.com",
+            endpoint: "tts.ap-shanghai.tencentcloudapi.com",
         },
     },
 };
@@ -44,6 +44,7 @@ const transTextVO = async (text, text_id) => {
         "VoiceType": cfg.VoiceType,
         "SessionId": text_id,
         "SampleRate" : 8000,
+        "Speed"  : -0.4,
         "Volume" : cfg.VoiceVolume,
         "Codec" : "mp3"
     };
