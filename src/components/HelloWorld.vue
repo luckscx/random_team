@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>光子上海羽球社 羽毛球随机分组</h1>
+    <h1>光子上海羽球社 场地随机分组</h1>
     <span>场地数</span>
     <el-radio-group v-model="plate">
       <el-radio :label="1">1</el-radio>
